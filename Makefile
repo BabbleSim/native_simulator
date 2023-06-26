@@ -16,8 +16,10 @@ NSI_BUILD_PATH?=$(abspath _build/)
 EXE_NAME?=native_simulator.exe
 NSI_EXE?=${NSI_BUILD_PATH}/${EXE_NAME}
 NSI_EMBEDDED_CPU_SW?=
-NSI_BUILD_OPTIONS?=
-NSI_LINK_OPTIONS?=
+NSI_ARCH?=-m32
+NSI_COVERAGE?=--coverage
+NSI_BUILD_OPTIONS?=${NSI_ARCH} ${NSI_COVERAGE}
+NSI_LINK_OPTIONS?=${NSI_ARCH} ${NSI_COVERAGE}
 NSI_EXTRA_SRCS?=
 NSI_EXTRA_LIBS?=
 
@@ -30,17 +32,15 @@ no_default:
 	@echo "There is no default rule, please specify what you want to build,\
  or run make help for more info"
 
-NSI_ARCH?=-m32
 NSI_DEBUG?=-g
 NSI_OPT?=-O0
 NSI_WARNINGS?=-Wall -Wpedantic
-NSI_COVERAGE?=--coverage
 NSI_CPPFLAGS?=-D_POSIX_C_SOURCE=200809 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED
 NO_PIE_CO:=-fno-pie -fno-pic
 DEPENDFLAGS:=-MMD -MP
-CFLAGS:=${NSI_ARCH} ${NSI_DEBUG} ${NSI_WARNINGS} ${NSI_COVERAGE} ${NSI_OPT} ${NO_PIE_CO} \
+CFLAGS:=${NSI_DEBUG} ${NSI_WARNINGS} ${NSI_OPT} ${NO_PIE_CO} \
   -ffunction-sections -fdata-sections ${DEPENDFLAGS} -std=c11 ${NSI_BUILD_OPTIONS}
-FINALLINK_FLAGS:=${NSI_ARCH} ${NSI_COVERAGE} ${NO_PIE_CO} -no-pie  ${NSI_WARNINGS} \
+FINALLINK_FLAGS:=${NO_PIE_CO} -no-pie  ${NSI_WARNINGS} \
   -Wl,--gc-sections -lm -ldl -pthread \
   ${NSI_LINK_OPTIONS}
 
