@@ -22,10 +22,15 @@
 extern "C" {
 #endif
 
+int nsi_host_close(int fd);
 /* void nsi_host_exit (int status); Use nsi_exit() instead */
+int nsi_host_isatty(int fd);
+int nsi_host_open(const char *pathname, int flags);
 /* int nsi_host_printf (const char *fmt, ...); Use the nsi_tracing.h equivalents */
 long nsi_host_random(void);
+long nsi_host_read(int fd, void *buffer, unsigned long size);
 void nsi_host_srandom(unsigned int seed);
+long nsi_host_write(int fd, void *buffer, unsigned long size);
 
 #ifdef __cplusplus
 }
