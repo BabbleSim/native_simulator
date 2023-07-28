@@ -186,7 +186,7 @@ pointers can be found in [Design.md](Design.md).
 
 ## License
 
-Please see LICENSE
+Please see [LICENSE](./LICENSE)
 
 ## Developer Certification of Origin (DCO)
 
