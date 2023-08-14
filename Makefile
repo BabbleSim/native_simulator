@@ -73,12 +73,18 @@ no_default:
 
 RUNNER_LIB:=runner.a
 
-SRCS:=$(shell ls ${NSI_PATH}common/src/*.c ${NSI_PATH}native/src/*.c )
+SRCS:=$(shell ls ${NSI_PATH}common/src/*.c)
+ifdef NSI_NATIVE
+  SRCS+=$(shell ls ${NSI_PATH}native/src/*.c)
+endif
 
 INCLUDES:=-I${NSI_PATH}common/src/include/ \
- -I${NSI_PATH}native/src/include/ \
  -I${NSI_PATH}common/src \
  ${NSI_EXTRA_INCLUDES}
+
+ifdef NSI_NATIVE
+  INCLUDES+=-I${NSI_PATH}native/src/include/
+endif
 
 EXTRA_OBJS:=$(abspath $(addprefix $(NSI_BUILD_PATH)/,$(sort ${NSI_EXTRA_SRCS:%.c=%.o})))
 OBJS:=$(abspath $(addprefix $(NSI_BUILD_PATH)/,${SRCS:${NSI_PATH}%.c=%.o})) ${EXTRA_OBJS}
