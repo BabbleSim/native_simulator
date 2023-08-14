@@ -19,6 +19,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include "nsi_cmdline_main_if.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,7 +69,6 @@ struct args_struct_t {
 #define ARG_TABLE_ENDMARKER \
 	{false, false, false, NULL, NULL, 0, NULL, NULL, NULL}
 
-void nsi_handle_cmd_line(int argc, char *argv[]);
 void nsi_get_cmd_line_args(int *argc, char ***argv);
 void nsi_get_test_cmd_line_args(int *argc, char ***argv);
 void nsi_add_command_line_opts(struct args_struct_t *args);

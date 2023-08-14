@@ -14,10 +14,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
 #include "nsi_cpu_if.h"
 #include "nsi_tasks.h"
-#include "nsi_cmdline.h"
+#include "nsi_cmdline_main_if.h"
 #include "nsi_utils.h"
 #include "nsi_hw_scheduler.h"
 
