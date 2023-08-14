@@ -111,6 +111,11 @@ void nsi_hws_find_next_event(void)
 	}
 }
 
+uint64_t nsi_hws_get_next_event_time(void)
+{
+	return next_timer_time;
+}
+
 /**
  * Execute the next scheduled HW event
  * (advancing time until that event would trigger)
