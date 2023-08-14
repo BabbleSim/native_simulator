@@ -37,7 +37,6 @@ int nsi_exit_inner(int exit_code)
 
 	nsi_run_tasks(NSITASK_ON_EXIT_PRE_LEVEL);
 	nsi_hws_cleanup();
-	nsi_cleanup_cmd_line();
 	nsi_run_tasks(NSITASK_ON_EXIT_POST_LEVEL);
 	return max_exit_code;
 }

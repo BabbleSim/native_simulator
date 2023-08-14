@@ -72,7 +72,6 @@ void nsi_handle_cmd_line(int argc, char *argv[]);
 void nsi_get_cmd_line_args(int *argc, char ***argv);
 void nsi_get_test_cmd_line_args(int *argc, char ***argv);
 void nsi_add_command_line_opts(struct args_struct_t *args);
-void nsi_cleanup_cmd_line(void);
 
 #ifdef __cplusplus
 }
