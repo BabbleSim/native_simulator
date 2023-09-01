@@ -7,7 +7,7 @@
 #include "nsi_cpu_if.h"
 
 /*
- * This trampolines forward a call from the runner into the corresponding embedded CPU book
+ * These trampolines forward a call from the runner into the corresponding embedded CPU hook
  * for ex., nsif_cpun_boot(4) -> nsif_cpu4_boot()
  */
 
