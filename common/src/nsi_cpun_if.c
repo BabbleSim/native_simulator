@@ -41,6 +41,15 @@
 		fptrs[n]();                \
 	}
 
+#define TRAMPOLINES_v(pre, post)             \
+	int pre ## n ## post(int n, void *p)\
+	{                                  \
+		int(*fptrs[])(void *p) = { \
+			F_TABLE(pre, post) \
+		};                         \
+		return fptrs[n](p);        \
+	}
+
 #define TRAMPOLINES_i(pre, post)             \
 	int pre ## n ## post(int n)          \
 	{                                    \
@@ -56,3 +65,4 @@ TRAMPOLINES(nsif_cpu, _boot)
 TRAMPOLINES_i(nsif_cpu, _cleanup)
 TRAMPOLINES(nsif_cpu, _irq_raised)
 TRAMPOLINES(nsif_cpu, _irq_raised_from_sw)
+TRAMPOLINES_v(nsif_cpu, _test_hook)

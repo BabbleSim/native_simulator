@@ -24,7 +24,8 @@ __attribute__((weak)) void nsif_cpu##i##_boot(void)                       \
 	}                                                                 \
 __attribute__((weak)) int nsif_cpu##i##_cleanup(void) { return 0; }       \
 __attribute__((weak)) void nsif_cpu##i##_irq_raised(void) { }             \
-__attribute__((weak)) void nsif_cpu##i##_irq_raised_from_sw(void) { }
+__attribute__((weak)) void nsif_cpu##i##_irq_raised_from_sw(void) { }     \
+__attribute__((weak)) int nsif_cpu##i##_test_hook(void *p) { return 0; }  \
 
 NSI_CPU_STUBBED_IMAGE(0)
 NSI_CPU_STUBBED_IMAGE(1)

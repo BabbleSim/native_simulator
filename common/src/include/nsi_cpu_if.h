@@ -93,13 +93,21 @@ NATIVE_SIMULATOR_IF void nsif_cpu0_irq_raised(void);
  */
 NATIVE_SIMULATOR_IF void nsif_cpu0_irq_raised_from_sw(void);
 
+/*
+ * Optional hook which may be used for test functionality.
+ * When the runner HW models use them and for what is up to those
+ * specific models.
+ */
+NATIVE_SIMULATOR_IF int nsif_cpu0_test_hook(void *p);
+
 #define NSI_CPU_IF_N(i) \
 NATIVE_SIMULATOR_IF void nsif_cpu##i##_pre_cmdline_hooks(void); \
 NATIVE_SIMULATOR_IF void nsif_cpu##i##_pre_hw_init_hooks(void); \
 NATIVE_SIMULATOR_IF void nsif_cpu##i##_boot(void);              \
 NATIVE_SIMULATOR_IF int  nsif_cpu##i##_cleanup(void);           \
 NATIVE_SIMULATOR_IF void nsif_cpu##i##_irq_raised(void);        \
-NATIVE_SIMULATOR_IF void nsif_cpu##i##_irq_raised_from_sw(void);
+NATIVE_SIMULATOR_IF void nsif_cpu##i##_irq_raised_from_sw(void);\
+NATIVE_SIMULATOR_IF int  nsif_cpu##i##_test_hook(void *p);      \
 
 NSI_CPU_IF_N(1)
 NSI_CPU_IF_N(2)
