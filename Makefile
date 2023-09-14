@@ -35,6 +35,7 @@ NSI_EMBEDDED_CPU_SW?=
 NSI_ARCH?=-m32
 #  Coverage switch (GCOV coverage is enabled by default)
 NSI_COVERAGE?=--coverage
+NSI_LOCALIZE_OPTIONS?=
 NSI_BUILD_OPTIONS?=${NSI_ARCH} ${NSI_COVERAGE}
 NSI_LINK_OPTIONS?=${NSI_ARCH} ${NSI_COVERAGE}
 #  Extra source files to be built in the runner context
@@ -116,14 +117,14 @@ ${NSI_BUILD_PATH}/${RUNNER_LIB}: ${OBJS}
 	if [ -f $@ ]; then rm $@ ; fi
 	${NSI_AR} -cr $@ ${OBJS}
 
-${NSI_BUILD_PATH}/%.loc_cpusw.o: /%
+${NSI_BUILD_PATH}/%.loc_cpusw.o: /% ${NSI_CONFIG_FILE}
 	@if [ -z $< ] || [ ! -f $< ]; then \
 	  echo "Error: Input embedded CPU SW ($<) not found \
 (NSI_EMBEDDED_CPU_SW=${NSI_EMBEDDED_CPU_SW} )"; \
 	  false; \
 	fi
 	@if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
-	${NSI_OBJCOPY} --localize-hidden $< $@ -w --localize-symbol=_*
+	${NSI_OBJCOPY} --localize-hidden $< $@ -w --localize-symbol=_* ${NSI_LOCALIZE_OPTIONS}
 
 ${NSI_EXE}: ${NSI_BUILD_PATH}/${RUNNER_LIB} ${LOCALIZED_EMBSW} ${NSI_EXTRA_LIBS} \
  ${NSI_BUILD_PATH}/linker_script.ld
