@@ -14,7 +14,6 @@ extern "C" {
 #endif
 
 /**
- *
  * @brief find least significant bit set in a 32-bit word
  *
  * This routine finds the first bit set starting from the least significant bit
@@ -31,7 +30,6 @@ static inline unsigned int nsi_find_lsb_set(uint32_t op)
 }
 
 /**
- *
  * @brief find least significant bit set in a 64-bit word
  *
  * This routine finds the first bit set starting from the least significant bit
