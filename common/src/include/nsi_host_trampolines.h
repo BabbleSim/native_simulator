@@ -11,8 +11,8 @@
  * to the embedded side, for example due to non-basic types being used in
  * function calls, as that would break the include path isolation
  *
- * Naming convention: nsi_hots_<fun>() where <func> is the name of the equivalent
- * C library call we call thru.
+ * Naming convention: nsi_host_<fun>() where <func> is the name of the equivalent
+ * C library function we call through
  */
 
 #ifndef NSI_COMMON_SRC_INCL_NSI_HOST_TRAMPOLINES_H
