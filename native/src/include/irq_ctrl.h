@@ -15,6 +15,11 @@
 
 #include <stdint.h>
 
+/* Default to 32 interrupts */
+#ifndef N_IRQS
+#define N_IRQS 32
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -28,7 +33,10 @@ uint8_t hw_irq_ctrl_get_prio(unsigned int irq);
 int hw_irq_ctrl_get_highest_prio_irq(void);
 uint32_t hw_irq_ctrl_get_current_lock(void);
 uint32_t hw_irq_ctrl_change_lock(uint32_t new_lock);
+// This function is only supported with <= 64 interrupts.
+#if N_IRQS <= 64
 uint64_t hw_irq_ctrl_get_irq_status(void);
+#endif
 void hw_irq_ctrl_disable_irq(unsigned int irq);
 int hw_irq_ctrl_is_irq_enabled(unsigned int irq);
 void hw_irq_ctrl_clear_irq(unsigned int irq);
@@ -37,7 +45,6 @@ void hw_irq_ctrl_set_irq(unsigned int irq);
 void hw_irq_ctrl_raise_im(unsigned int irq);
 void hw_irq_ctrl_raise_im_from_sw(unsigned int irq);
 
-#define N_IRQS 32
 
 #ifdef __cplusplus
 }
