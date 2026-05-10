@@ -9,17 +9,23 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include "nsi_internal.h"
 #include "nsi_cpu_if.h"
 #include "nsi_cpu0_interrupts.h"
 #include "irq_ctrl.h"
 #include "nsi_tasks.h"
+#include "nsi_tracing.h"
 #include "nsi_hws_models_if.h"
+
+#define BITS_U64 64
+#define NUM_U64_IRQS (N_IRQS + BITS_U64 - 1) / BITS_U64
 
 static uint64_t irq_ctrl_timer = NSI_NEVER;
 
-static uint64_t irq_status;  /* pending interrupts */
-static uint64_t irq_premask; /* interrupts before the mask */
+// Bitmasks for each interrupt.
+static uint64_t irq_status[NUM_U64_IRQS] = {0}; // Pending interrupts.
+static uint64_t irq_premask[NUM_U64_IRQS] = {0}; // Interrupts before the mask.
 
 /*
  * Mask of which interrupts will actually cause the cpu to vector into its
@@ -28,8 +34,9 @@ static uint64_t irq_premask; /* interrupts before the mask */
  * case it is enabled later before clearing it.
  * If the irq_mask enables and interrupt pending in irq_premask, it will cause
  * the controller to raise the interrupt immediately
+ * 0 means masked, 1 means unmasked
  */
-static uint64_t irq_mask;
+static uint64_t irq_mask[NUM_U64_IRQS] = {0};
 
 /*
  * Interrupts lock/disable. When set, interrupts are registered
@@ -44,10 +51,17 @@ static uint8_t irq_prio[N_IRQS]; /* Priority of each interrupt */
 
 static int currently_running_prio = 256; /* 255 is the lowest prio interrupt */
 
+static uint64_t global_irq_to_bitmask(unsigned int irq, size_t *u64_idx) {
+	*u64_idx = irq / BITS_U64;
+	return ((uint64_t) 1 << (irq % BITS_U64));
+}
+
 static void hw_irq_ctrl_init(void)
 {
-	irq_mask = 0U; /* Let's assume all interrupts are disable at boot */
-	irq_premask = 0U;
+	for (int i = 0; i < NUM_U64_IRQS; i++) {
+		irq_mask[i] = 0;
+		irq_premask[i] = 0;
+	}
 	irqs_locked = false;
 	lock_ignore = false;
 
@@ -70,11 +84,17 @@ int hw_irq_ctrl_get_cur_prio(void)
 
 void hw_irq_ctrl_prio_set(unsigned int irq, unsigned int prio)
 {
+	if (irq >= N_IRQS) {
+		nsi_print_error_and_exit("Interrupt %i is out of range\n", irq);
+	}
 	irq_prio[irq] = prio;
 }
 
 uint8_t hw_irq_ctrl_get_prio(unsigned int irq)
 {
+	if (irq >= N_IRQS) {
+		nsi_print_error_and_exit("Interrupt %i is out of range\n", irq);
+	}
 	return irq_prio[irq];
 }
 
@@ -90,18 +110,19 @@ int hw_irq_ctrl_get_highest_prio_irq(void)
 		return -1;
 	}
 
-	uint64_t irq_status_temp = hw_irq_ctrl_get_irq_status();
 	int winner = -1;
 	int winner_prio = 256;
 
-	while (irq_status_temp != 0U) {
-		int irq_nbr = nsi_find_lsb_set64(irq_status_temp) - 1;
-
-		irq_status_temp &= ~((uint64_t) 1 << irq_nbr);
-		if ((winner_prio > (int)irq_prio[irq_nbr])
-		   && (currently_running_prio > (int)irq_prio[irq_nbr])) {
-			winner = irq_nbr;
-			winner_prio = irq_prio[irq_nbr];
+	for (int i = 0; i < NUM_U64_IRQS; i++) {
+		uint64_t status = irq_status[i];
+		while (status != 0) {
+			int bit_idx = nsi_find_lsb_set64(status) - 1;
+			int irq_nbr = bit_idx + (i * BITS_U64);
+			if (winner_prio > irq_prio[irq_nbr] && currently_running_prio > irq_prio[irq_nbr]) {
+				winner = irq_nbr;
+				winner_prio = irq_prio[irq_nbr];
+			}
+			status &= ~(1ULL << bit_idx);
 		}
 	}
 	return winner;
@@ -124,45 +145,58 @@ uint32_t hw_irq_ctrl_change_lock(uint32_t new_lock)
 
 	irqs_locked = new_lock;
 
-	if ((previous_lock == true) && (new_lock == false) && (irq_status != 0U)) {
-		nsif_cpu0_irq_raised_from_sw();
+	if ((previous_lock == true) && (new_lock == false)) {
+		for (int i = 0; i < NUM_U64_IRQS; i++) {
+			if (irq_status[i] != 0) {
+				nsif_cpu0_irq_raised_from_sw();
+				break;
+			}
+		}
 	}
 	return previous_lock;
 }
 
+#if N_IRQS <= 64
 uint64_t hw_irq_ctrl_get_irq_status(void)
 {
-	return irq_status;
+	return irq_status[0];
 }
+#endif
 
 void hw_irq_ctrl_clear_all_enabled_irqs(void)
 {
-	irq_status  = 0U;
-	irq_premask &= ~irq_mask;
+	for (int i = 0; i < NUM_U64_IRQS; i++) {
+		irq_status[i] = 0;
+		irq_premask[i] &= ~irq_mask[i];
+	}
 }
 
 void hw_irq_ctrl_clear_all_irqs(void)
 {
-	irq_status  = 0U;
-	irq_premask = 0U;
+	for (int i = 0; i < NUM_U64_IRQS; i++) {
+		irq_status[i] = 0;
+		irq_premask[i] = 0;
+	}
 }
 
 void hw_irq_ctrl_disable_irq(unsigned int irq)
 {
-	irq_mask &= ~((uint64_t)1<<irq);
+	if (irq >= N_IRQS) {
+		nsi_print_error_and_exit("Interrupt %i is out of range\n", irq);
+	}
+	size_t u64_idx;
+	uint64_t bit_mask = global_irq_to_bitmask(irq, &u64_idx);
+	irq_mask[u64_idx] &= ~bit_mask;
 }
 
 int hw_irq_ctrl_is_irq_enabled(unsigned int irq)
 {
-	return (irq_mask & ((uint64_t)1 << irq))?1:0;
-}
-
-/**
- * Get the current interrupt enable mask
- */
-uint64_t hw_irq_ctrl_get_irq_mask(void)
-{
-	return irq_mask;
+	if (irq >= N_IRQS) {
+		nsi_print_error_and_exit("Interrupt %i is out of range\n", irq);
+	}
+	size_t u64_idx;
+	uint64_t bit_mask = global_irq_to_bitmask(irq, &u64_idx);
+	return irq_mask[u64_idx] & bit_mask;
 }
 
 /*
@@ -173,8 +207,13 @@ uint64_t hw_irq_ctrl_get_irq_mask(void)
  */
 void hw_irq_ctrl_clear_irq(unsigned int irq)
 {
-	irq_status  &= ~((uint64_t)1<<irq);
-	irq_premask &= ~((uint64_t)1<<irq);
+	if (irq >= N_IRQS) {
+		nsi_print_error_and_exit("Interrupt %i is out of range\n", irq);
+	}
+	size_t u64_idx;
+	uint64_t bit_mask = global_irq_to_bitmask(irq, &u64_idx);
+	irq_status[u64_idx] &= ~bit_mask;
+	irq_premask[u64_idx] &= ~bit_mask;
 }
 
 
@@ -188,24 +227,31 @@ void hw_irq_ctrl_clear_irq(unsigned int irq)
  */
 void hw_irq_ctrl_enable_irq(unsigned int irq)
 {
-	irq_mask |= ((uint64_t)1<<irq);
-	if (irq_premask & ((uint64_t)1<<irq)) { /* if the interrupt is pending */
+	if (irq >= N_IRQS) {
+		nsi_print_error_and_exit("Interrupt %i is out of range\n", irq);
+	}
+	size_t u64_idx;
+	uint64_t bit_mask = global_irq_to_bitmask(irq, &u64_idx);
+	irq_mask[u64_idx] |= bit_mask;
+	if (irq_premask[u64_idx] & bit_mask) { /* if the interrupt is pending */
 		hw_irq_ctrl_raise_im_from_sw(irq);
 	}
 }
 
 static inline void hw_irq_ctrl_irq_raise_prefix(unsigned int irq)
 {
-	if (irq < N_IRQS) {
-		irq_premask |= ((uint64_t)1<<irq);
-
-		if (irq_mask & ((uint64_t)1 << irq)) {
-			irq_status |= ((uint64_t)1<<irq);
-		}
-	} else if (irq == PHONY_HARD_IRQ) {
+	if (irq == PHONY_HARD_IRQ) {
 		lock_ignore = true;
-	} else {
-		/* PHONY_WEAK_IRQ does not require any action */
+	} else if (irq >= N_IRQS) {
+		nsi_print_error_and_exit("Interrupt %i is out of range\n", irq);
+	}
+	size_t u64_idx;
+	uint64_t bit_mask = global_irq_to_bitmask(irq, &u64_idx);
+
+	irq_premask[u64_idx] |= bit_mask;
+
+	if (irq_mask[u64_idx] & bit_mask) {
+		irq_status[u64_idx] |= bit_mask;
 	}
 }
 
@@ -217,6 +263,9 @@ static inline void hw_irq_ctrl_irq_raise_prefix(unsigned int irq)
  */
 void hw_irq_ctrl_set_irq(unsigned int irq)
 {
+	if (irq >= N_IRQS) {
+		nsi_print_error_and_exit("Interrupt %i is out of range\n", irq);
+	}
 	hw_irq_ctrl_irq_raise_prefix(irq);
 	if ((irqs_locked == false) || lock_ignore) {
 		/*
@@ -254,6 +303,9 @@ static void irq_raising_from_hw_now(void)
  */
 void hw_irq_ctrl_raise_im(unsigned int irq)
 {
+	if (irq >= N_IRQS) {
+		nsi_print_error_and_exit("Interrupt %i is out of range\n", irq);
+	}
 	hw_irq_ctrl_irq_raise_prefix(irq);
 	irq_raising_from_hw_now();
 }
@@ -265,6 +317,9 @@ void hw_irq_ctrl_raise_im(unsigned int irq)
  */
 void hw_irq_ctrl_raise_im_from_sw(unsigned int irq)
 {
+	if (irq >= N_IRQS) {
+		nsi_print_error_and_exit("Interrupt %i is out of range\n", irq);
+	}
 	hw_irq_ctrl_irq_raise_prefix(irq);
 
 	if (irqs_locked == false) {
