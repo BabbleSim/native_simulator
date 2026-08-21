@@ -65,6 +65,7 @@ static uint64_t hw_timer_timer; /* Event timer exposed to the HW scheduler */
 static uint64_t hw_timer_tick_timer;
 static uint64_t hw_timer_rt_timer;
 static uint64_t hw_timer_awake_timer;
+static uint64_t hw_timer_deadline_timer;
 
 static uint64_t tick_p; /* Period of the ticker */
 static int64_t silent_ticks;
@@ -129,6 +130,7 @@ static void hwtimer_update_timer(void)
 {
 	hw_timer_timer = NSI_MIN(hw_timer_tick_timer, hw_timer_awake_timer);
 	hw_timer_timer = NSI_MIN(hw_timer_timer, hw_timer_rt_timer);
+	hw_timer_timer = NSI_MIN(hw_timer_timer, hw_timer_deadline_timer);
 }
 
 static inline void host_clock_gettime(struct timespec *tv)
@@ -173,6 +175,7 @@ static void hwtimer_init(void)
 	silent_ticks = 0;
 	hw_timer_tick_timer = NSI_NEVER;
 	hw_timer_awake_timer = NSI_NEVER;
+	hw_timer_deadline_timer = NSI_NEVER;
 	hwtimer_update_timer();
 
 	if (!reset_rtc) {
@@ -269,6 +272,13 @@ static void hwtimer_awake_timer_reached(void)
 	hw_irq_ctrl_set_irq(PHONY_HARD_IRQ);
 }
 
+static void hwtimer_deadline_timer_reached(void)
+{
+	hw_timer_deadline_timer = NSI_NEVER;
+	hwtimer_update_timer();
+	hw_irq_ctrl_set_irq(TIMER_TICK_IRQ);
+}
+
 static void hwtimer_timer_reached(void)
 {
 	uint64_t Now = hw_timer_timer;
@@ -279,6 +289,10 @@ static void hwtimer_timer_reached(void)
 
 	if (hw_timer_rt_timer == Now) {
 		hwtimer_rt_timer_reached();
+	}
+
+	if (hw_timer_deadline_timer == Now) {
+		hwtimer_deadline_timer_reached();
 	}
 
 	if (hw_timer_tick_timer == Now) {
@@ -310,6 +324,22 @@ void hwtimer_wake_in_time(uint64_t time)
 		hwtimer_update_timer();
 		nsi_hws_find_next_event();
 	}
+}
+
+/**
+ * Raise the tick interrupt when simulated time reaches <deadline>, an absolute
+ * time in microseconds since boot. A deadline already passed fires at once.
+ * NSI_NEVER cancels without setting a new one.
+ *
+ * One-shot alternative to hwtimer_enable()'s periodic tick. Do not use both.
+ */
+void hwtimer_set_tick_deadline(uint64_t deadline)
+{
+	uint64_t now = nsi_hws_get_time();
+
+	hw_timer_deadline_timer = NSI_MAX(deadline, now);
+	hwtimer_update_timer();
+	nsi_hws_find_next_event();
 }
 
 /**
