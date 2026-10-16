@@ -32,7 +32,10 @@ struct nce_status_t {
 	bool cpu_halted;
 	bool terminate; /* Are we terminating the program == cleaning up */
 	void (*start_routine)(void);
+	int cpu_number;
 };
+
+static int nce_current_cpu_nbr = NCE_CPU_NBR_NO_CPU_RUNNING;
 
 #define NCE_DEBUG_PRINTS 0
 
@@ -74,11 +77,30 @@ void *nce_init(void)
 	}
 	this->cpu_halted = true;
 	this->terminate = false;
+	this->cpu_number = NCE_CPU_NBR_UNKNOWN;
 
 	NSI_SAFE_CALL(sem_init(&this->sem_sw, 0, 0));
 	NSI_SAFE_CALL(sem_init(&this->sem_hw, 0, 0));
 
 	return (void *)this;
+}
+
+/*
+ * Register in this nce instance this CPU's "cpu number".
+ * Must be called on an initialized nce status pointer.
+ */
+void nce_set_cpu_nbr(void *this_arg, int cpu_nbr) {
+	((struct nce_status_t *)this_arg)->cpu_number = cpu_nbr;
+}
+
+/*
+ * Return the currently running CPU number
+ * or
+ * NCE_CPU_NBR_UNKNOWN(-1) if nce_set_cpu_nbr() was never called for the currently running CPU
+ * NCE_CPU_NBR_NO_CPU_RUNNING(-2) if no CPU is running
+ */
+int nce_get_current_cpu_nbr(void) {
+	return nce_current_cpu_nbr;
 }
 
 /*
@@ -191,6 +213,7 @@ void nce_halt_cpu(void *this_arg)
 					"This CPU was already halted\n");
 	}
 	this->cpu_halted = true;
+	nce_current_cpu_nbr = NCE_CPU_NBR_NO_CPU_RUNNING;
 
 	NSI_SAFE_CALL(sem_post(&this->sem_hw));
 	NSI_SAFE_CALL(nce_sem_rewait(&this->sem_sw));
@@ -216,6 +239,7 @@ void nce_wake_cpu(void *this_arg)
 	}
 
 	this->cpu_halted = false;
+	nce_current_cpu_nbr = this->cpu_number;
 
 	NSI_SAFE_CALL(sem_post(&this->sem_sw));
 	NSI_SAFE_CALL(nce_sem_rewait(&this->sem_hw));
