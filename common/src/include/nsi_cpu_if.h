@@ -29,7 +29,7 @@ extern "C" {
  * The interface between the embedded SW and the native simulator is allocated in its
  * own section to allow the embedded software developers to, using a linker script,
  * direct the linker to keep those symbols even when doing its linking with garbage collection.
- * It is also be possible for the embedded SW to require the linker to keep those
+ * It is also possible for the embedded SW to require the linker to keep those
  * symbols by requiring each of them to be kept explicitly by name (either by defining them
  * as entry points, or as required in the output).
  * It is also possible for the embedded SW developers to not use garbage collection
@@ -77,7 +77,7 @@ NATIVE_SIMULATOR_IF void nsif_cpu0_boot(void);
 /*
  * Called by the runner when the simulation is ending/exiting
  *
- * The embedded SW library may provide this function.
+ * The embedded SW library may provide this function
  * to do any cleanup it needs.
  */
 NATIVE_SIMULATOR_IF int nsif_cpu0_cleanup(void);
@@ -93,7 +93,7 @@ NATIVE_SIMULATOR_IF void nsif_cpu0_irq_raised(void);
 
 /*
  * Called by the runner each time an interrupt is raised in SW context itself.
- * That is, when a embedded SW action in the HW models, causes an immediate
+ * That is, when an embedded SW action in the HW models, causes an immediate
  * interrupt to be raised (while the execution is still in the
  * context of the calling SW thread).
  */

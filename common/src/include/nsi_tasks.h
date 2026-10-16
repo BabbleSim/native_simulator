@@ -27,7 +27,7 @@ extern "C" {
  * Register a function to be called at particular moments
  * during the Native Simulator execution.
  *
- * There is 5 choices for when the function will be called (level):
+ * There are 5 choices for when the function will be called (level):
  * * PRE_BOOT_1: Will be called before the command line parameters are parsed,
  *   or the HW models are initialized
  *
@@ -61,7 +61,7 @@ extern "C" {
 /**
  * @brief Run the set of special native tasks corresponding to the given level
  *
- * @param level One of NSITASK_*_LEVEL as defined in soc.h
+ * @param level One of NSITASK_*_LEVEL as defined in this file
  */
 void nsi_run_tasks(int level);
 

@@ -16,14 +16,14 @@ extern "C" {
 /*
  * These APIs are exposed for special use cases in which a developer needs to
  * replace the native simulator main loop.
- * An example of such a case is LLVMs fuzzing support. For this one sets
- * NSI_NO_MAIN, and provides an specialized main() or hooks into the tooling
+ * An example of such a case is LLVM's fuzzing support. For this one sets
+ * NSI_NO_MAIN, and provides a specialized main() or hooks into the tooling
  * provided main().
  *
  * These APIs should be used with care, and not be used when the native
  * simulator main() is built in.
  *
- * Check nsi_main.c for more information.
+ * Check main.c for more information.
  */
 
 void nsi_init(int argc, char *argv[]);

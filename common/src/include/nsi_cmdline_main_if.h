@@ -6,7 +6,7 @@
 
 /**
  * @file
- * @brief API to the native simulator expects any integrating program has for handling
+ * @brief The native simulator expects any integrating program provides this API for handling
  *        command line argument parsing
  */
 

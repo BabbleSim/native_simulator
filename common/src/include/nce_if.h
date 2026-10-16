@@ -15,7 +15,7 @@ extern "C" {
  *
  * Check docs/NCE.md for an overview.
  *
- * A descriptions of each function can be found in the .c file
+ * A description of each function can be found in the .c file
  */
 
 #define NCE_CPU_NBR_NO_CPU_RUNNING -2

@@ -126,9 +126,9 @@ void nce_terminate(void *this_arg)
 	if (this == NULL || this->cpu_halted) {
 		/*
 		 * Note: The nce_status structure cannot be safely free'd up
-		 * as the user is allowed to call nce_clean_up()
+		 * as the user is allowed to call nce_terminate()
 		 * repeatedly on the same structure.
-		 * Instead we rely of on the host OS process cleanup.
+		 * Instead we rely on the host OS process cleanup.
 		 * If you got here due to valgrind's leak report, please use the
 		 * provided valgrind suppression file valgrind.supp
 		 */
@@ -197,7 +197,7 @@ void nce_boot_cpu(void *this_arg, void (*start_routine)(void))
 
 /*
  * Halt the CPU, that is:
- *  * Hold this embedded SW thread until the CPU is awaken again,
+ *  * Hold this embedded SW thread until the CPU is awakened again,
  *    and release the HW thread which had been held on
  *    nce_boot_cpu() or nce_wake_cpu().
  *

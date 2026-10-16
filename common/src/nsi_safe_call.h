@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef NSI_COMMON_SRC_NSI_SAFE_CALLL_H
-#define NSI_COMMON_SRC_NSI_SAFE_CALLL_H
+#ifndef NSI_COMMON_SRC_NSI_SAFE_CALL_H
+#define NSI_COMMON_SRC_NSI_SAFE_CALL_H
 
 #include <stdbool.h>
 #include "nsi_tracing.h"
@@ -34,4 +34,4 @@ static inline void nsi_safe_call(int test, const char *test_str)
 }
 #endif
 
-#endif /* NSI_COMMON_SRC_NSI_SAFE_CALLL_H */
+#endif /* NSI_COMMON_SRC_NSI_SAFE_CALL_H */

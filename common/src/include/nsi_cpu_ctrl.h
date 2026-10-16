@@ -27,7 +27,7 @@ bool nsi_cpu_get_auto_start(int cpu_n);
 /**
  * @brief Boot CPU <cpu_n>
  *
- * Note: This API may only be called if that CPU was not stared before
+ * Note: This API may only be called if that CPU was not started before
  *
  * @param[in] cpu_n:      Which CPU
  */

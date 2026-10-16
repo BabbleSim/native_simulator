@@ -158,7 +158,7 @@ void nsi_hws_init(void)
 /**
  * Function to free any resources allocated by the HW scheduler
  *
- * Note that the HW models should register their initialization functions
+ * Note that the HW models should register their cleanup functions
  * as NSI_TASKS of ON_EXIT_PRE/POST levels.
  */
 void nsi_hws_cleanup(void)

@@ -13,12 +13,12 @@
  * Native simulator single CPU threading emulation,
  * an *optional* module provided by the Native simulator
  * the hosted embedded OS / SW can use to emulate the threading
- * context switching which would be handled by a OS CPU AL
+ * context switching which would be handled by an OS CPU AL
  *
  * Principle of operation:
  *
  * The embedded OS threads are run as a set of native Linux pthreads.
- * The embedded OS only sees one of this threads executing at a time.
+ * The embedded OS only sees one of these threads executing at a time.
  *
  * The hosted OS (or its integration into the native simulator) shall call
  * nct_init() to initialize the state of an instance of this module, and
@@ -48,7 +48,7 @@
  * The creation of a thread will spawn a new pthread whose start
  * is asynchronous to the rest, until synchronized in nct_wait_until_allowed()
  * below.
- * Similarly aborting and canceling threads execute a tail in a quite an
+ * Similarly aborting and canceling threads executes a tail in quite an
  * asynchronous manner.
  *
  * This implementation is meant to be portable in between fully compatible
@@ -81,7 +81,7 @@
 #define NCT_DEBUG(...)
 #endif
 
-#define PREFIX     "Tread Simulator: "
+#define PREFIX     "Thread Simulator: "
 #define ERPREFIX   PREFIX"error on "
 #define NO_MEM_ERR PREFIX"Can't allocate memory\n"
 
@@ -109,7 +109,7 @@ struct threads_table_el {
 
 	/*
 	 * Pointer to data from the hosted OS architecture.
-	 * What that is, if anything, is up to that the hosted OS
+	 * What that is, if anything, is up to the hosted OS
 	 */
 	void *payload;
 };
@@ -445,7 +445,7 @@ void nct_get_thread_stack(void *this_arg, int thread_idx, void **stack_addr,
 /**
  * Initialize an instance of the threading emulator.
  *
- * Returns a pointer to the initialize threading emulator instance.
+ * Returns a pointer to the initialized threading emulator instance.
  * This pointer shall be passed to all subsequent calls of the
  * threading emulator when interacting with this particular instance.
  *
@@ -492,7 +492,7 @@ void *nct_init(void (*fptr)(void *))
  * (the CPU is assumed halted. Otherwise we would cancel ourselves)
  *
  * Note: This function cannot guarantee the threads will be cancelled before the HW
- * thread exists. The only way to do that, would be to wait for each of them in
+ * thread exits. The only way to do that, would be to wait for each of them in
  * a join without detaching them, but that could lead to locks in some
  * convoluted cases; as a call to this function can come due to a hosted OS
  * assert or other error termination, we better do not assume things are working fine.
@@ -623,9 +623,9 @@ int nct_thread_name_set(void *this_arg, int thread_idx, const char *str)
  * (typically the idle thread). That means the test may finish before that
  * thread's underlying pthread has reached nct_wait_until_allowed().
  *
- * In this unlikely cases the initialization or cleanup of the thread follows
+ * In these unlikely cases the initialization or cleanup of the thread follows
  * non-typical code paths.
- * This code paths are there to ensure things work always, no matter
+ * These code paths are there to ensure things work always, no matter
  * the load of the host. Without them, very rare & mysterious segfault crashes
  * would occur.
  * But as they are very atypical and only triggered with some host loads,

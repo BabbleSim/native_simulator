@@ -9,7 +9,7 @@
 # setting the NSI_BUILD_PATH
 #
 # The caller can provide an optional configuration file and point to it with NSI_CONFIG_FILE
-# See "Configurable/user overridible variables" below.
+# See "Configurable/user overridable variables" below.
 #
 # By default only the core of the runner will be built, but the caller can set NSI_NATIVE
 # to also build the components in native/src/
