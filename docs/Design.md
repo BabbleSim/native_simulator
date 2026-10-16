@@ -16,7 +16,7 @@ some changes).
 
 To be able to build this embedded SW, we either also build with it models of the HW, or we instead
 build with special embedded drivers that provide the rest of the embedded SW the functionality they
-expect, either thru mocks, stubs, HW models, or interaction with the host system.
+expect, either through mocks, stubs, HW models, or interaction with the host system.
 
 ## Overall execution
 
@@ -31,8 +31,8 @@ After, the embedded CPUs are started, by calling into the respective embedded CP
 Here we expect the embedded CPU library to initialize an [NCE](NCE.md) instance, and
 use it to spawn a new pthread which will run the embedded CPU SW initialization.
 
-After all CPUs are initialiazed, the original thread will only be used for HW models;
-while this newly created threads will be the first "SW" thread in each CPU and start
+After all CPUs are initialized, the original thread will only be used for HW models;
+while these newly created threads will be the first "SW" thread in each CPU and start
 executing the respective boot of their embedded code.
 
 During this MCU boot process, it is expected that the embedded OS and applications
@@ -49,7 +49,7 @@ until the first time it goes to sleep happens in 0 simulated time.
 
 At this point the last executing embedded SW pthread will be blocked,
 and the first/main thread will be allowed
-to execute again. If there is more CPUs to be booted, the process will be repeated for each CPU,
+to execute again. If there are more CPUs to be booted, the process will be repeated for each CPU,
 otherwise this main thread will, from now on, be the one handling both the
 HW models and the device simulated time.
 
@@ -106,7 +106,7 @@ In the case of the basic native model provided, a fake HW timer is dedicated for
 
 When a SW thread wants to busy wait, this fake timer can be programmed in the future time
 corresponding to the end of the busy wait and the CPU be put immediately to sleep in
-the busy_wait caller context. When this fake HW timer expires the CPU will be waken with
+the busy_wait caller context. When this fake HW timer expires the CPU will be woken with
 a special non-maskable phony interrupt which does not have a corresponding interrupt handler
 but will resume the busy_wait SW execution. Note that other interrupts may arrive while the
 busy wait is in progress, which may delay the k_busy_wait() return just like in real life.
@@ -123,10 +123,10 @@ a set of hooks called the NSI_TASKS.
 These allow registering (at build/link time) functions which will be called at different stages
 during the process execution: Before command line parsing (so dynamic command line arguments
 can be registered using this hook), before initialization of the HW models, during HW models
-initialization, before the simulated CPUs are started, after the simulated CPUs goes to sleep
-for the first time, and when the application exists.
+initialization, before the simulated CPUs are started, after the simulated CPUs go to sleep
+for the first time, and when the application exits.
 
-Check [nsi_tasks.h](../common/src/nsi_tasks.h)
+Check [nsi_tasks.h](../common/src/include/nsi_tasks.h)
 
 Note that the embedded CPU SW has its own hooks, as described in
 [nsi_cpu_if.h](../common/src/include/nsi_cpu_if.h).
@@ -135,8 +135,8 @@ Note that the embedded CPU SW has its own hooks, as described in
 ## The HW scheduling
 
 HW is scheduled by having HW models register their own events and the deadlines for those events.
-Events types are registered statically (at build time), with `NSI_HW_EVENT`, with this
-HW models can register an event: it's "timer" (a pointer to a 64 bit value which contains
+Event types are registered statically (at build time), with `NSI_HW_EVENT`, with this
+HW models can register an event: its "timer" (a pointer to a 64 bit value which contains
 the next time the event is meant to trigger in microseconds since boot),
 the callback to be called when the event triggers, and the event priority.
 See [nsi_hws_models_if.h](../common/src/include/nsi_hws_models_if.h) for more info.
@@ -155,10 +155,10 @@ If several events coincide in time, the HW scheduler will in the same time, in d
 ## Embedded OS adaptation
 
 For simplicity and to ensure deterministic execution,
-the native simulator works under the asumption that each simulated embedded MCU is a
+the native simulator works under the assumption that each simulated embedded MCU is a
 single threaded processor. And therefore, only one embedded thread is executed at a time in each of
 those MCUs.
-(If multiple embedded threads where to execute in parallel in the host OS, their relative execution
+(If multiple embedded threads were to execute in parallel in the host OS, their relative execution
 would not be controlled, and therefore the overall execution would not be deterministic).
 
 To ease building the embedded OS adaptation, the native simulator includes two components:
@@ -193,7 +193,7 @@ Please check the [nsi_cpu_if.h header](../common/src/include/nsi_cpu_if.h), and 
 Check the description on the top level
 [README, Overall way of working, section](README.md#overall_way_of_working)
 
-The library containing the embededd SW for each CPU must be a static library
+The library containing the embedded SW for each CPU must be a static library
 (either a `.a` or a single `.o`).
 
 To avoid name collisions, it is very recommendable that this library be prelinked
@@ -232,7 +232,7 @@ Note that the embedded library should not refer to fixed embedded addresses.
 Instead use symbolic addresses (pointers) to refer to peripherals.
 Note also that you should not refer to ROM, RAM, or flash addresses; Your linker script should not
 try to place sections in particular address ranges.
-(unless you are taking care of remaping that memory area in the Linux process virtual memory
+(unless you are taking care of remapping that memory area in the Linux process virtual memory
 in your embedded software adaptation code)
 
 

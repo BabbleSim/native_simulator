@@ -18,8 +18,6 @@ It provides a bottom layer you can use to build a new HW/CPU adaptation layer fo
 embedded SW/embedded OS.
 You can find more information in the [Design section](#design_anchor).
 
-<a name="Rationale_anchor"></a>
-
 <a name="overall_way_of_working"></a>
 
 ## Overall way of working
@@ -40,7 +38,7 @@ some changes to it:
 * A linker script may not be necessary at all, or a custom and cut-down version for use with the
   native simulator may be necessary.
 
-This embedded software library may, optionally, be built with an embededd C library. Otherwise
+This embedded software library may, optionally, be built with an embedded C library. Otherwise
 it can be built using the host C library.
 
 In this library all but a very small subset of symbols are hidden.
@@ -72,6 +70,7 @@ As a Zephyr user you can use this board out of the box to develop and debug your
 If you are not a Zephyr user, but are considering using the native simulator with your embedded
 software you may want to look into how Zephyr is integrated with the native simulator.
 
+<a name="Rationale_anchor"></a>
 
 ## Rationale
 
@@ -111,7 +110,7 @@ Having the real memory map or emulating the exact time an instruction executes i
 Emulating peripherals accurately is another side.
 </i></p>
 
-This native port compiles your code directly for the host architectture
+This native port compiles your code directly for the host architecture
 (typically x86), with no instrumentation or
 monitoring code. Your code executes directly in the host CPU. That is, your code
 executes just as fast as it possibly can.
@@ -193,7 +192,7 @@ Please see [LICENSE](./LICENSE)
 This project requires the Developer Certificate of Origin (DCO)
 process to be followed for its contributions.
 
-This is done as a resonable measure to ensure all code in the project
+This is done as a reasonable measure to ensure all code in the project
 can be licensed under the claimed terms.
 
 By adding a ``Signed-off-by`` line to the commit body message like:

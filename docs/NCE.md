@@ -16,8 +16,8 @@ call `nce_terminate()` with that same pointer to clean up.
 
 After initialization and during boot (when `nsif_cpu?_boot()` is called) the CPU SW
 should call `nce_boot_cpu()` to spawn a new pthread which will be dedicated to the
-embedded SW. This new thread will run the embedded SW initializatrion function provided
-as paremeter to `nce_boot_cpu()`.
+embedded SW. This new thread will run the embedded SW initialization function provided
+as parameter to `nce_boot_cpu()`.
 
 Note that the HW scheduling will be blocked (and therefore time will not pass)
 until `nce_halt_cpu()` is called from either that new thread, or another thread it spawns.
